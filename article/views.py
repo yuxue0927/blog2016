@@ -3,7 +3,7 @@
 from django.http import HttpResponse
 from django.shortcuts import render, redirect
 from django.http import Http404
-
+from django.template import RequestContext
 from django.contrib.syndication.views import Feed
 
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
@@ -18,7 +18,7 @@ from datetime import datetime
 
 
 def console(request):
-    if 's' in request.GET:
+    if request.method == 'GET' and 's' in request.GET:
         s = request.GET['s']
         if not s:
             return render(request,'console.html', {'returned' : ''})
@@ -27,6 +27,15 @@ def console(request):
             child = subprocess.Popen(s, stdout=subprocess.PIPE)
             data = child.stdout.read()
             return render(request,'console.html', {'returned' : data})
+    elif request.method == 'POST' and 's' in request.POST:
+        s = request.POST['s']
+        if s:
+            import subprocess
+            child = subprocess.Popen(s, stdout=subprocess.PIPE)
+            data = child.stdout.read()
+        else:
+            data = 'error'
+        return render(request,'console.html', {'returned' : data},context_instance=RequestContext(request))
     else:
         return render(request,'console.html', {'returned' : ''})
 

@@ -6,7 +6,8 @@
         <p>{{ returned }}</p>
         <p> 请输入 </p>
 
-                    <form class="pure-form" action="/console/" method="get">
+                    <form class="pure-form" action="/console/" method="post">
+                    {% csrf_token %}
                     <input class="pure-input-3-3" type="text" name="s" placeholder="console">
                     </form>
 
