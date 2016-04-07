@@ -33,6 +33,8 @@ def console(request):
             import subprocess
             child = subprocess.Popen(s, stdout=subprocess.PIPE)
             data = child.stdout.read()
+            if not data :
+                data = 'Null'
         else:
             data = 'error'
         return render(request,'console.html', {'returned' : data},context_instance=RequestContext(request))
