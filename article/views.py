@@ -31,7 +31,8 @@ def console(request):
         s = request.POST['s']
         if s:
             import subprocess
-            child = subprocess.Popen(s, stdout=subprocess.PIPE)
+            child = subprocess.Popen('cd mysite \n', stdout=subprocess.PIPE, stdin=subprocess.PIPE,shell=True)
+            child.stdin.write(s)
             data = child.stdout.read()
             if not data :
                 data = 'Null'
