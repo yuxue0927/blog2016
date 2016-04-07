@@ -24,7 +24,7 @@ def console(request):
             return render(request,'console.html', {'returned' : ''})
         else:
             import subprocess
-            child = subprocess.Popen(s, stdout=subprocess.PIPE)
+            child = subprocess.Popen(s, stdout=subprocess.PIPE,shell=True)
             data = child.stdout.read()
             return render(request,'console.html', {'returned' : data})
     elif request.method == 'POST' and 's' in request.POST:
