@@ -1,71 +1,51 @@
-name: Build Kivy APK
+on: [push, pull_request]
 
-# 触发条件：当推送到 main 分支时运行
-on:
-  push:
-    branches: [ main ]
-  workflow_dispatch: # 允许手动触发
+env:
+  PYTHONFORANDROID_PREREQUISITES_INSTALL_INTERACTIVE: 0
 
-
+name: Android Integration
 jobs:
-  build-apk:
-    runs-on: ubuntu-latest
+  Integration:
+    strategy:
+      matrix:
+        os:
+          - 'ubuntu-latest'
+    runs-on: ${{ matrix.os }}
     steps:
-    - name: Checkout 代码
-      uses: actions/checkout@v5
-
-    - name: Set up Python
+    - name: Setup Python
       uses: actions/setup-python@v6
       with:
-        python-version: '3.11'
-
-    - name: Set up Java
+        python-version: '3.x'
+    - name: Setup Java
       uses: actions/setup-java@v5
       with:
         java-version: '17'
         distribution: 'temurin'
-
-    - name: 安装系统依赖
+    - uses: actions/checkout@v5
+    - name: Setup environment
       run: |
-        sudo apt-get update
-        sudo apt-get install -y git zip unzip openjdk-17-jdk
-
-    - name: 安装 Python 依赖
+        pip install .
+    - run: buildozer --help
+    - run: buildozer init
+    - name: SDK, NDK, and p4a download
       run: |
-        pip install --upgrade pip
-        # 安装 Buildozer 和常见的 Kivy recipes
-        pip install buildozer
-
-    - name: 配置 Buildozer
-      run: |
-        # 1. 如果没有 buildozer.spec 文件，则生成一个
-        if [ ! -f "buildozer.spec" ]; then
-          buildozer init
-        fi
-        
-        # 2. 自动修改 spec 文件配置
-        # 使用 python-for-android 的 develop 分支 (更稳定)
+        sed -i.bak "s/# android.accept_sdk_license = False/android.accept_sdk_license = True/" buildozer.spec
         sed -i.bak "s/#p4a.branch = master/p4a.branch = develop/" buildozer.spec
-        # 设置 Android API 级别
-        sed -i.bak "s/#android.api = 30/android.api = 31/" buildozer.spec
-        # 设置最小支持版本
-        sed -i.bak "s/#android.minapi = 21/android.minapi = 21/" buildozer.spec
-        # 设置 SDK 版本
-        sed -i.bak "s/#android.sdk = 30/android.sdk = 34/" buildozer.spec
-        # 设置 NDK 版本 (Buildozer 默认可能较旧，指定一个兼容版本)
-        sed -i.bak "s/#android.ndk = 25b/android.ndk = 25b/" buildozer.spec
-        
-        # 3. 确保有一个简单的 main.py 入口文件
-        
-
-    - name: 构建 Debug APK
+        buildozer android p4a -- --help
+    # Install OS specific dependencies
+    - name: Install Linux dependencies
+      if: runner.os == 'Linux'
+      # Required by some p4a recipes, but not
+      # installed by p4a on Linux.
       run: |
-        # 第一次运行会下载 NDK/SDK，耗时较长 (约 15-20 分钟)
-        buildozer -v android debug
-      # 注意：如果构建失败，可以点击此处查看详细日志
-
-    - name: 上传构建产
-      uses: actions/upload-artifact@v4
-      with:
-        name: kivy-apk-debug
-        path: bin/*.apk
+        sudo apt update
+        sudo apt -y install automake libltdl-dev
+    - name: Debug Build
+      run: |
+        touch main.py
+        buildozer android debug
+    - name: Release Build (aab)
+      run: |
+        touch main.py
+        export BUILDOZER_ALLOW_ORG_TEST_DOMAIN=1
+        buildozer android release
