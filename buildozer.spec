@@ -1,14 +1,14 @@
 [app]
 
 title = Test App
-package.name = testapp
+package.name = kivy
 package.domain = org.test
 
 source.dir = .
 source.include_exts = py,png,jpg,kv,atlas
 
 version = 0.1
-requirements = python3,kivy
+requirements = python3==3.11,kivy
 
 orientation = portrait
 fullscreen = 0
@@ -18,4 +18,4 @@ android.accept_sdk_license = True
 p4a.branch = develop
 
 [buildozer]
-log_level = 2
+log_level = 1
