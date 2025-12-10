@@ -1,0 +1,64 @@
+name: Build Kivy APK
+
+# 触发条件：当推送到 main 分支，或者手动触发
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    # 使用 Ubuntu 环境（必须，因为 Buildozer 在 Linux 下最稳定）
+    runs-on: ubuntu-latest
+
+    steps:
+    # 1. 检出代码
+    - uses: actions/checkout@v4
+
+    # 2. 设置 Python 环境
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.9'
+
+    # 3. 安装系统依赖
+    - name: Install System Dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y git zip unzip openjdk-17-jdk android-tools-adb
+        # 安装 Buildozer 所需的编译库
+        sudo apt-get install -y python3-dev build-essential libffi-dev libgstreamer-plugins-base1.0-dev \
+                               libgles2-mesa-dev libsdl2-dev libsdl2-image-dev libsdl2-mixer-dev libsdl2-ttf-dev
+
+    # 4. 安装 Python 依赖
+    - name: Install Python Dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install buildozer
+
+    # 5. (可选) 缓存 Buildozer 目录，加速下次构建
+    - name: Cache Buildozer
+      uses: actions/cache@v3
+      with:
+        path: ~/.buildozer
+        key: ${{ runner.os }}-buildozer-${{ hashFiles('**/buildozer.spec') }}
+        restore-keys: |
+          ${{ runner.os }}-buildozer-
+
+    # 6. 执行打包命令
+    - name: Build APK
+      run: |
+        # 初始化 (如果不存在 buildozer.spec，这一步会报错，所以确保存在)
+        # buildozer init
+        
+        # 核心命令：打包 Debug 版本 APK
+        # -v 参数表示详细输出，方便排查错误
+        buildozer -v android debug
+
+    # 7. 上传生成的 APK 作为工作流产物
+    - name: Upload APK
+      uses: actions/upload-artifact@v3
+      with:
+        name: Kivy-APK
+        path: bin/*.apk
+        if-no-files-found: error
