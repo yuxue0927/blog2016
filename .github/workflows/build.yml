@@ -3,9 +3,15 @@ name: Build Kivy APK
 # 触发条件：当推送到 main 分支，或者手动触发
 on:
   push:
-    branches: [ main ]
-  workflow_dispatch:
-
+    branches-ignore:
+      - data
+      - gh-pages
+    tags:
+      - '**'
+  pull_request:
+    branches-ignore:
+      - data
+      - gh-pages
 jobs:
   build:
     # 使用 Ubuntu 环境（必须，因为 Buildozer 在 Linux 下最稳定）
@@ -28,7 +34,7 @@ jobs:
         sudo apt-get install -y git zip unzip openjdk-17-jdk android-tools-adb
         # 安装 Buildozer 所需的编译库
         sudo apt-get install -y python3-dev build-essential libffi-dev libgstreamer-plugins-base1.0-dev \
-                               libgles2-mesa-dev libsdl2-dev libsdl2-image-dev libsdl2-mixer-dev libsdl2-ttf-dev cython
+                               libgles2-mesa-dev libsdl2-dev libsdl2-image-dev libsdl2-mixer-dev libsdl2-ttf-dev cython3
 
     # 4. 安装 Python 依赖
     - name: Install Python Dependencies
