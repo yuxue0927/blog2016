@@ -1,17 +1,10 @@
 name: Build Kivy APK
 
-# 触发条件：当推送到 main 分支，或者手动触发
+# 触发条件：当推送到 main 分支时运行
 on:
   push:
-    branches-ignore:
-      - data
-      - gh-pages
-    tags:
-      - '**'
-  pull_request:
-    branches-ignore:
-      - data
-      - gh-pages
+    branches: [ main ]
+  workflow_dispatch: # 允许手动触发
 
 env:
   # 避免 p4a 安装时的交互式提示
