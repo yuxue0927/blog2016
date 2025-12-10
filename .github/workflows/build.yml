@@ -15,7 +15,7 @@ jobs:
     - name: Setup Python
       uses: actions/setup-python@v6
       with:
-        python-version: '3.x'
+        python-version: '3.11'
     - name: Setup Java
       uses: actions/setup-java@v5
       with:
@@ -44,8 +44,8 @@ jobs:
       run: |
         touch main.py
         buildozer android debug
-    - name: Release Build (aab)
-      run: |
-        touch main.py
-        export BUILDOZER_ALLOW_ORG_TEST_DOMAIN=1
-        buildozer android release
+    - name: 上传构建
+      uses: actions/upload-artifact@v4
+      with:
+        name: kivy-apk-debug
+        path: bin/*.apk
