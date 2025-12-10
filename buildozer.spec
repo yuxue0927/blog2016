@@ -18,4 +18,4 @@ android.accept_sdk_license = True
 p4a.branch = develop
 
 [buildozer]
-log_level = 1
+log_level = 2
