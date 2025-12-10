@@ -26,7 +26,7 @@ jobs:
       run: |
         pip install buildozer
     - run: buildozer --help
-    - run: buildozer init
+    #- run: buildozer init
     - name: SDK, NDK, and p4a download
       run: |
         sed -i.bak "s/# android.accept_sdk_license = False/android.accept_sdk_license = True/" buildozer.spec
