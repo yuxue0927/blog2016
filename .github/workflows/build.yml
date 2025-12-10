@@ -6,42 +6,37 @@ on:
     branches: [ main ]
   workflow_dispatch: # 允许手动触发
 
-env:
-  # 避免 p4a 安装时的交互式提示
-  PYTHONFORANDROID_PREREQUISITES_INSTALL_INTERACTIVE: 0
-  # 自动接受 Android SDK 许可协议（关键！）
-  ANDROID_ACCEPT_LICENSES: true
 
 jobs:
   build-apk:
     runs-on: ubuntu-latest
     steps:
-    - name: 📂 Checkout 代码
+    - name: Checkout 代码
       uses: actions/checkout@v5
 
-    - name: 🐍 Set up Python
+    - name: Set up Python
       uses: actions/setup-python@v6
       with:
         python-version: '3.11'
 
-    - name: ⚙️ Set up Java
+    - name: Set up Java
       uses: actions/setup-java@v5
       with:
         java-version: '17'
         distribution: 'temurin'
 
-    - name: 🛠️ 安装系统依赖
+    - name: 安装系统依赖
       run: |
         sudo apt-get update
         sudo apt-get install -y git zip unzip openjdk-17-jdk
 
-    - name: 📦 安装 Python 依赖
+    - name: 安装 Python 依赖
       run: |
         pip install --upgrade pip
         # 安装 Buildozer 和常见的 Kivy recipes
         pip install buildozer
 
-    - name: 📝 配置 Buildozer
+    - name: 配置 Buildozer
       run: |
         # 1. 如果没有 buildozer.spec 文件，则生成一个
         if [ ! -f "buildozer.spec" ]; then
@@ -61,25 +56,15 @@ jobs:
         sed -i.bak "s/#android.ndk = 25b/android.ndk = 25b/" buildozer.spec
         
         # 3. 确保有一个简单的 main.py 入口文件
-        cat > main.py << EOF
-from kivy.app import App
-from kivy.uix.label import Label
+        
 
-class TestApp(App):
-    def build(self):
-        return Label(text='Hello from GitHub Actions!')
-
-TestApp().run()
-EOF
-
-    - name: 🚀 构建 Debug APK
+    - name: 构建 Debug APK
       run: |
         # 第一次运行会下载 NDK/SDK，耗时较长 (约 15-20 分钟)
         buildozer -v android debug
       # 注意：如果构建失败，可以点击此处查看详细日志
 
-    - name: 📎 上传构建产物
-      if: success()
+    - name: 上传构建产
       uses: actions/upload-artifact@v4
       with:
         name: kivy-apk-debug
