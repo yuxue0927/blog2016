@@ -1,6 +1,6 @@
 [app]
 
-title = Test App
+title = App
 package.name = kivy
 package.domain = org.test
 
